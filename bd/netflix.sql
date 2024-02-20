@@ -110,3 +110,50 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2024-02-15 11:18:49
+USE netflix;
+SELECT * FROM movies;
+SELECT genre, title 
+from movies 
+where yearMovie>1900;
+SELECT * 
+FROM movies
+WHERE category = 'Top 10';
+UPDATE movies
+SET yearMovie = 1997 WHERE idMovies = 2; 
+SELECT *
+FROM actors;
+
+
+
+SELECT nameActors
+FROM actors
+WHERE birthday BETWEEN '1950-01-01' and '1960-12-31';
+
+
+
+
+SELECT nameActors, lastname
+FROM  actors
+WHERE country = 'estados unidos';
+
+SELECT * 
+FROM users
+WHERE plan_details = 'standard';
+
+DELETE FROM users WHERE idUser = 2;
+
+INSERT INTO actors (image)
+VALUES ('fotoejemplo'); favorites
+
+ALTER TABLE actors ADD image VARCHAR (75) AFTER birthday;
+
+ALTER TABLE movies_has_actors ADD 
+column fk_idMovies INT;
+ALTER TABLE movies_has_actors ADD 
+column fk_idActors INT;
+ALTER TABLE movies_has_actors ADD 
+column id_movies_has_actors INT;
+
+
+
+
