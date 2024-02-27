@@ -2,12 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2/promise');
 
-// create and config server
-const server = express();
-server.use(cors());
-server.use(express.json());
+// create and config app
+const app = express();
+app.use(cors());
+app.use(express.json());
+require('dotenv').config();
 
-async function getConnection() {
+
+const getConnection = async () => {
   const connection = await mysql.createConnection({
     host: 'localhost',
     database: 'netflix',
@@ -23,32 +25,48 @@ async function getConnection() {
 }
 
 // init express aplication
-const serverPort = 4000;
-server.listen(serverPort, () => {
-  console.log(`Server listening at http://localhost:${serverPort}`);
+const appPort = 4000;
+app.listen(appPort, () => {
+  console.log(`app listening at http://localhost:${appPort}`);
 });
 
-server.get('/movies', async (req, res) => {
-  const { genre, sort } = req.query;
+app.get('/movies', async (req, res) => {
+  const { g, s } = req.query;
   console.log('Pidiendo a la base de datos información de las movies.');
-
   const connection = await getConnection();
-  let resultsMovies;
+  let listMovies = [];
+  if (g === '') {
+    const selectMovie = `SELECT * FROM movies ORDER BY title ${s}`;
+    const [resultsMovies] = await connection.query(selectMovie);
+    listMovies = resultsMovies;
 
-  if (genre === '') {
-    const selectMovie = `SELECT * FROM movies ORDER BY title.${sort}`;
-    [resultsMovies] = await connection.query(selectMovie);
   } else {
-    const selectMovie = `SELECT * FROM movies WHERE genre =? order by title.${sort}`;
-    [resultsMovies] = await connection.query(selectMovie,  [genre]);
+    const selectMovie = `SELECT * FROM movies WHERE genre =? order by title ${s}`;
+    const [resultsMovies] = await connection.query(selectMovie,  [g]);
+    listMovies = resultsMovies;
   }
-  console.log(resultsMovies);
+  // console.log(listMovies);
   connection.end();
   res.json({
     success: true,
-    movies: resultsMovies,
+    movies: listMovies,
   });
 });
 
-const staticServerPathWeb = './web'; // En esta carpeta ponemos los ficheros estáticos
-server.use(express.static(staticServerPathWeb));
+app.get('/movies/:idMovies', async (req, res) => {
+  const idMovies = req.query.idMovies;
+  const connection = await getConnection();
+  console.log(`http://localhost:/movies/${idMovies}`);
+  const foundMovie = `SELECT * FROM movies WHERE idMovies = ${idMovies}`;
+  const [resultId, fields] = await connection.query(foundMovie, [req.query.idMovies]);
+  console.log(foundMovie);
+  connection.end();
+  res.json({
+    success: true,
+    movies: resultId,
+  });
+})
+
+
+const staticappPathWeb = './web'; // En esta carpeta ponemos los ficheros estáticos
+app.use(express.static(staticappPathWeb));
