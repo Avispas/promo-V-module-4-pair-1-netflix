@@ -7,14 +7,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 require('dotenv').config();
-
+server.set('view engine', 'ejs');
 
 const getConnection = async () => {
   const connection = await mysql.createConnection({
     host: 'localhost',
     database: 'netflix',
     user: 'root',
-    password: 'Localhost',
+    password: 'root',
   });
   await connection.connect();
 
@@ -22,7 +22,7 @@ const getConnection = async () => {
     `Conexión establecida con la base de datos (identificador0${connection.threadId})`
   );
   return connection;
-}
+};
 
 // init express aplication
 const appPort = 4000;
@@ -39,10 +39,9 @@ app.get('/movies', async (req, res) => {
     const selectMovie = `SELECT * FROM movies ORDER BY title ${s}`;
     const [resultsMovies] = await connection.query(selectMovie);
     listMovies = resultsMovies;
-
   } else {
     const selectMovie = `SELECT * FROM movies WHERE genre =? order by title ${s}`;
-    const [resultsMovies] = await connection.query(selectMovie,  [g]);
+    const [resultsMovies] = await connection.query(selectMovie, [g]);
     listMovies = resultsMovies;
   }
   // console.log(listMovies);
@@ -54,19 +53,20 @@ app.get('/movies', async (req, res) => {
 });
 
 app.get('/movies/:idMovies', async (req, res) => {
-  const idMovies = req.query.idMovies;
+  const idMovies = req.params.idMovies;
+
   const connection = await getConnection();
-  console.log(`http://localhost:/movies/${idMovies}`);
+  console.log(req.params.idMovies);
   const foundMovie = `SELECT * FROM movies WHERE idMovies = ${idMovies}`;
-  const [resultId, fields] = await connection.query(foundMovie, [req.query.idMovies]);
-  console.log(foundMovie);
+  const [resultId] = await connection.query(foundMovie);
+  console.log(resultId);
+
   connection.end();
   res.json({
     success: true,
     movies: resultId,
   });
-})
-
+});
 
 const staticappPathWeb = './web'; // En esta carpeta ponemos los ficheros estáticos
 app.use(express.static(staticappPathWeb));
