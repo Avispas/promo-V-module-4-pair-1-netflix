@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 require('dotenv').config();
-server.set('view engine', 'ejs');
+app.set('view engine', 'ejs');
 
 const getConnection = async () => {
   const connection = await mysql.createConnection({
@@ -57,15 +57,16 @@ app.get('/movies/:idMovies', async (req, res) => {
 
   const connection = await getConnection();
   console.log(req.params.idMovies);
-  const foundMovie = `SELECT * FROM movies WHERE idMovies = ${idMovies}`;
-  const [resultId] = await connection.query(foundMovie);
-  console.log(resultId);
+  const select = `SELECT * FROM movies WHERE idMovies = ${idMovies}`;
+  const [foundMovie] = await connection.query(select);
 
   connection.end();
-  res.json({
-    success: true,
-    movies: resultId,
-  });
+  res.render('movie', foundMovie[0]);
+
+  // res.json({
+  //   success: true,
+  //   movies: foundMovie,
+  // });
 });
 
 const staticappPathWeb = './web'; // En esta carpeta ponemos los ficheros estáticos
